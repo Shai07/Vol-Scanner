@@ -2,10 +2,20 @@ import numpy as np
 import pandas as pd
 from soupsieve import closest
 from scipy.stats import norm
+import yfinance as yf
 
 
 def get_atm_iv(chain, spot: float, target_dte, method="nearest_strike") -> float:
     pass
+
+def fetch_chain(ticker: str, target_dte: int) -> tuple[pd.DataFrame, pd.DataFrame, float]:
+    # returns calls, puts, spot
+    tk = yf.Ticker(ticker)
+    expirations = tk.options          # tuple of date strings
+    spot = tk.fast_info['last_price']
+    chain = tk.option_chain(expirations[0])  # curr 
+    calls = chain.calls
+    puts = chain.puts
 
 
 def implied_volatility(market_price: float, S: float, K: float, T: float, r: float) -> float:
