@@ -6,7 +6,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 
 
-def get_atm_iv(ticker: str, target_dte, method="nearest_strike", r: float = 0.05) -> tuple[float, float, float]:
+def get_atm_iv(ticker: str, target_dte, r: float = 0.05) -> tuple[float, float, float]:
     calls, puts, S, closest_exp = fetch_chain(ticker, target_dte)
     actual_dte = (datetime.strptime(closest_exp, "%Y-%m-%d") - datetime.today()).days
     T = actual_dte / 365
@@ -84,10 +84,3 @@ def black_scholes(S: float, K: float, T: float, r: float, sigma: float, option_t
     
 
     return multiplier * (S * norm.cdf(multiplier * d1) - K * np.exp(-r * T) * norm.cdf(multiplier * d2))
-
-    
-
-avg_iv, call_iv, put_iv = get_atm_iv("SPY", 30)
-print(f"Avg IV: {avg_iv:.2%}")
-print(f"Call IV: {call_iv:.2%}")
-print(f"Put IV: {put_iv:.2%}")
