@@ -32,3 +32,6 @@ def get_current_hv(prices: pd.Series, window: int, method: str = "close_to_close
         raise ValueError(f"Not enough data to compute HV with window={window}. Need at least {window+1} prices.")
     
     return float(series.iloc[-1])
+
+def get_avg_hv(prices: pd.Series, window: int, method: str = "close_to_close") ->float:
+    return float(compute_hv(prices, window, method).mean())
