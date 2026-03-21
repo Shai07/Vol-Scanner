@@ -1,8 +1,9 @@
 {
-  "watchlist": ["SPY", "QQQ", "AAPL", "TSLA", "NVDA", "MSFT", "GOOGL", "AMZN", "META"],
+  "watchlist": ["SPY", "QQQ", "AAPL", "TSLA", "NVDA", "MSFT", "GOOGL", "AMZN",
+                "META", "LLY", "LULU", "WDC", "SNDK"],
   "hv_window": 30,
   "lookback": 180,
-  "target_dte": 30,
+  "target_dte": [30, 45, 60, 90, 180],
   "risk_free_rate": 0.05,
   "flag_threshold": 0.05,
   "flag_percentile": 20,

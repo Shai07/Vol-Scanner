@@ -21,7 +21,8 @@ def run_scanner(config: dict) -> list[VRPResult]:
     results = []
     for ticker in config["watchlist"]:
         try:
-            results.append(compute_vrp(ticker, config["hv_window"], config["lookback"], config["target_dte"], config["risk_free_rate"]))
+            for date in config["target_dte"]:
+                results.append(compute_vrp(ticker, config["hv_window"], config["lookback"], date, config["risk_free_rate"]))
         except Exception as e:
             print(f"⚠ Skipping {ticker}: {e}")
 
@@ -33,12 +34,12 @@ def print_results(results: list[VRPResult], flag_threshold: float, flag_percenti
     # print each row with flag if applicable
     results.sort(key= lambda tk: tk.vrp_current, reverse=True)
     # header
-    print(f"{'Ticker':<8} {'IV':>8} {'HV Current':>12} {'HV Avg':>10} {'VRP Current':>12} {'VRP Avg':>10} {'Flag':>6}")
-    print("─" * 70)
+    print(f"{'Ticker':<8} {'IV':>8} {'TTE': >5} {'HV Current':>12} {'HV Avg':>10} {'VRP Current':>12} {'VRP Avg':>10} {'Flag':>6}")
+    print("─" * 78)
 
     for result in results:
         flag = result.vrp_current >= flag_threshold
-        print(f"{result.ticker:<8} {result.iv:>8.2%} {result.hv_current:>12.2%} {result.hv_avg:>10.2%} {result.vrp_current:>12.2%} {result.vrp_average:>10.2%} {flag:>6}")
+        print(f"{result.ticker:<8} {result.iv:>8.2%} {result.target_dte:>5} {result.hv_current:>12.2%} {result.hv_avg:>10.2%} {result.vrp_current:>12.2%} {result.vrp_average:>10.2%} {flag:>6}")
 
 
 if __name__ == "__main__":
