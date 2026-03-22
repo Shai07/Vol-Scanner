@@ -18,17 +18,21 @@ def load_config(path: str = "config.json") -> dict:
 def run_scanner(config: dict) -> list[VRPResult]:
     # loop over watchlist, collect results
     # handle errors per ticker gracefully
+    if not config.get("watchlist"):
+        print("Invalid watchlist. Add tickers to config.json")
+        return []
+
     results = []
     for ticker in config["watchlist"]:
-        try:
-            for date in config["target_dte"]:
+        for date in config["target_dte"]:
+            try:
                 results.append(compute_vrp(ticker, config["hv_window"], config["lookback"], date, config["risk_free_rate"]))
-        except Exception as e:
-            print(f"⚠ Skipping {ticker}: {e}")
+            except Exception as e:
+                print(f"⚠ Skipping {ticker} {date}d: {e}")
 
     return results
 
-def print_results(results: list[VRPResult], flag_threshold: float, flag_percentile: int) -> None:
+def print_results(results: list[VRPResult], flag_threshold: float) -> None:
     # sort by vrp_current descending
     # print header
     # print each row with flag if applicable
@@ -38,11 +42,16 @@ def print_results(results: list[VRPResult], flag_threshold: float, flag_percenti
     print("─" * 78)
 
     for result in results:
-        flag = result.vrp_current >= flag_threshold
+        if result.vrp_current > flag_threshold:
+            flag = "⚠ HIGH"
+        elif result.vrp_current < flag_threshold:
+            flag = "⚠ LOW"
+        else:
+            flag = "-"
         print(f"{result.ticker:<8} {result.iv:>8.2%} {result.target_dte:>5} {result.hv_current:>12.2%} {result.hv_avg:>10.2%} {result.vrp_current:>12.2%} {result.vrp_average:>10.2%} {flag:>6}")
 
 
 if __name__ == "__main__":
     config = load_config()
     results = run_scanner(config)
-    print_results(results, config["flag_threshold"], config["flag_percentile"])
+    print_results(results, config["flag_threshold"])
