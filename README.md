@@ -106,9 +106,32 @@ TSLA       48.99%    45       31.83%     42.93%       17.15%      6.05%   ⚠ HI
 META       42.74%    45       26.55%     32.80%       16.19%      9.94%   ⚠ HIGH
 GOOGL      34.47%    30       23.43%     26.66%       11.04%      7.81%   ⚠ HIGH
 AAPL       25.34%    30       27.03%     22.22%       -1.70%      3.11%    ⚠ LOW
+
+VRP Current by Ticker × TTE
+──────────────────────────────────────────────────
+Ticker           30d       45d       60d       90d      180d
+──────────────────────────────────────────────────
+TSLA          17.39%    17.15%    15.98%    14.86%    16.78%
+META           9.47%    16.19%    14.60%    12.52%    12.70%
+GOOGL         11.04%    14.63%    13.99%    12.69%    13.16%
+WDC            8.88%    10.27%    12.57%       N/A     7.93%
+
+VRP Average by Ticker × TTE
+──────────────────────────────────────────────────
+Ticker           30d       45d       60d       90d      180d
+──────────────────────────────────────────────────
+TSLA           6.29%     6.05%     4.88%     3.76%     5.68%
+META           3.22%     9.94%     8.35%     6.27%     6.45%
+GOOGL          7.81%    11.40%    10.76%     9.46%     9.93%
+WDC           19.59%    20.98%    23.27%       N/A    18.64%
 ```
 
-Results are sorted by `vrp_current` descending so the most interesting names surface at the top. Each ticker appears once per configured expiry, allowing term structure comparisons across the watchlist.
+The scanner produces three views of the data:
+- **Ranked table** — all (ticker, expiry) combinations sorted by `vrp_current` descending, with flags
+- **VRP Current pivot** — each ticker's `vrp_current` across all expiries side by side, making term structure patterns immediately visible
+- **VRP Average pivot** — same layout for `vrp_average`, showing how current VRP compares to the longer-run average
+
+`N/A` appears when a ticker had no valid options data for a given expiry.
 
 ---
 
@@ -124,19 +147,21 @@ Edit `vrp/config.json` to customize the scanner:
   "target_dte": [30, 45, 60, 90, 180],
   "risk_free_rate": 0.05,
   "flag_threshold": 0.05,
-  "hv_method": "close_to_close"
+  "hv_method": "close_to_close",
+  "use_custom_hv_window": false
 }
 ```
 
 | Parameter | Description |
 |---|---|
 | `watchlist` | List of ticker symbols to scan |
-| `hv_window` | Rolling window for HV calculation (calendar days) |
+| `hv_window` | Rolling window for HV calculation (calendar days). Only used when `use_custom_hv_window` is `true` |
 | `lookback` | History window for average HV (calendar days) |
 | `target_dte` | List of target expiries to scan (calendar days) |
 | `risk_free_rate` | Risk-free rate used in Black-Scholes |
 | `flag_threshold` | Flag if `VRP` exceeds this value (e.g. 0.05 = 5%). Positive triggers ⚠ HIGH, negative triggers ⚠ LOW |
 | `hv_method` | HV calculation method (`close_to_close`) |
+| `use_custom_hv_window` | If `false` (default), HV window matches each TTE for apples-to-apples comparison (30d IV vs 30d HV). If `true`, uses `hv_window` for all expiries |
 
 ---
 
@@ -144,7 +169,7 @@ Edit `vrp/config.json` to customize the scanner:
 
 ```bash
 git clone https://github.com/Shai07/Vol-Scanner.git
-cd Vol-Scanner/
+cd Vol-Scanner
 pip install -r requirements.txt
 cd vrp
 python3 scanner.py
