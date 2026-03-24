@@ -8,11 +8,13 @@ A modular volatility analysis toolkit for equity options. Currently includes a *
 
 ```
 Vol-Scanner/
+├── requirements.txt
 └── vrp/
     ├── hv.py           # Historical volatility engine
     ├── iv.py           # Implied volatility extraction pipeline
     ├── vrp.py          # VRP computation and result model
     ├── scanner.py      # Watchlist scanner and terminal output
+    ├── sectors.py      # Predefined sector baskets
     └── config.json     # User configuration
 ```
 
@@ -87,6 +89,16 @@ compute_vrp(ticker, hv_window, lookback, target_dte, r) -> VRPResult
 
 ---
 
+### `sectors.py` — Sector Baskets
+
+Contains predefined watchlists organized by market sector. Users select a sector in `config.json` rather than maintaining a manual ticker list, making intra-sector VRP comparisons straightforward.
+
+Available sectors: `technology`, `biotechnology`, `healthcare`, `financials`, `energy`, `industrials`, `consumer_discretionary`, `consumer_staples`, `utilities`, `real_estate`, `materials`, `communication_services`, `defense`, `semiconductors`, `software`, `etfs`
+
+Each basket contains 20 tickers. The `etfs` basket is useful as a broad market benchmark.
+
+---
+
 ### `scanner.py` — Watchlist Scanner
 
 Reads `config.json`, runs `compute_vrp` for each ticker across all configured expiries, and prints a ranked terminal table with flags for unusual readings. Failed tickers or expiries are skipped gracefully with a warning.
@@ -141,27 +153,27 @@ Edit `vrp/config.json` to customize the scanner:
 
 ```json
 {
-  "watchlist": ["SPY", "QQQ", "AAPL", "TSLA", "NVDA"],
+  "sector": "technology",
   "hv_window": 30,
+  "use_custom_hv_window": false,
   "lookback": 180,
-  "target_dte": [30, 45, 60, 90, 180],
+  "target_dte": [30, 45, 60, 75, 90, 105],
   "risk_free_rate": 0.05,
   "flag_threshold": 0.05,
-  "hv_method": "close_to_close",
-  "use_custom_hv_window": false
+  "hv_method": "close_to_close"
 }
 ```
 
 | Parameter | Description |
 |---|---|
-| `watchlist` | List of ticker symbols to scan |
+| `sector` | Sector basket to scan. Must match a key in `sectors.py` |
 | `hv_window` | Rolling window for HV calculation (calendar days). Only used when `use_custom_hv_window` is `true` |
+| `use_custom_hv_window` | If `false` (default), HV window matches each TTE for apples-to-apples comparison (30d IV vs 30d HV). If `true`, uses `hv_window` for all expiries |
 | `lookback` | History window for average HV (calendar days) |
 | `target_dte` | List of target expiries to scan (calendar days) |
 | `risk_free_rate` | Risk-free rate used in Black-Scholes |
 | `flag_threshold` | Flag if `VRP` exceeds this value (e.g. 0.05 = 5%). Positive triggers ⚠ HIGH, negative triggers ⚠ LOW |
 | `hv_method` | HV calculation method (`close_to_close`) |
-| `use_custom_hv_window` | If `false` (default), HV window matches each TTE for apples-to-apples comparison (30d IV vs 30d HV). If `true`, uses `hv_window` for all expiries |
 
 ---
 
