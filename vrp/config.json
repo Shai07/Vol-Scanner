@@ -1,10 +1,9 @@
 {
-  "watchlist": ["SPY", "QQQ", "AAPL", "TSLA", "NVDA", "MSFT", "GOOGL", "AMZN",
-                "META", "LLY", "LULU", "WDC", "SNDK"],
+  "sector": "technology",
   "hv_window": 30,
   "use_custom_hv_window": false,
   "lookback": 180,
-  "target_dte": [30, 45, 60, 90, 180],
+  "target_dte": [30, 45, 60, 75, 90, 105],
   "risk_free_rate": 0.05,
   "flag_threshold": 0.05,
   "hv_method": "close_to_close"

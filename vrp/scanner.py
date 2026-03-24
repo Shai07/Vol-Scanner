@@ -1,6 +1,7 @@
 # scanner.py
 import json
 from vrp import compute_vrp, VRPResult
+from sectors import market_sectors 
 
 def load_config(path: str = "config.json") -> dict:
     try: 
@@ -18,12 +19,14 @@ def load_config(path: str = "config.json") -> dict:
 def run_scanner(config: dict) -> list[VRPResult]:
     # loop over watchlist, collect results
     # handle errors per ticker gracefully
-    if not config.get("watchlist"):
-        print("Invalid watchlist. Add tickers to config.json")
+    sector = config.get("sector")
+    watchlist = market_sectors.get(sector)
+    if not watchlist:
+        print(f"Unknown sector '{sector}'. Valid options: {list(market_sectors.keys())}")
         return []
 
     results = []
-    for ticker in config["watchlist"]:
+    for ticker in watchlist:
         for date in config["target_dte"]:
             try:
                 hv_window = date if not config["use_custom_hv_window"] else config["hv_window"]
@@ -46,7 +49,7 @@ def print_results(results: list[VRPResult], flag_threshold: float) -> None:
     for result in results:
         if result.vrp_current > flag_threshold:
             flag = "⚠ HIGH"
-        elif result.vrp_current < flag_threshold:
+        elif result.vrp_current < -flag_threshold:
             flag = "⚠ LOW"
         else:
             flag = "-"
@@ -56,7 +59,8 @@ def print_pivot_tables(results: list[VRPResult], config: dict) -> None:
     from collections import defaultdict
 
     dtes = sorted(config["target_dte"])
-    tickers = config["watchlist"]
+    sector = config.get('sector')
+    tickers = market_sectors.get(sector, [])
 
     vrp_current_matrix = defaultdict(dict)
     vrp_average_matrix = defaultdict(dict)
